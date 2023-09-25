@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { ResponsiveContainer, PieChart, Pie, Legend, Cell, Label, Tooltip } from 'recharts';
+import  { useEffect, useState } from 'react';
+import { ResponsiveContainer, PieChart, Pie, Legend, Cell,  Tooltip } from 'recharts';
 
 const Statistics = () => {
     const [totalData, SetTotaldata] = useState([]);
@@ -21,9 +21,8 @@ const Statistics = () => {
     }, []);
 
     // Calculate the percentage of "Donation added" relative to "Total Donation"
-    const totalDonationCount = totalData.length;
-    const donationAddedCount = donate.length;
-    const donationPercentage = (donationAddedCount / totalDonationCount) * 100;
+    const totalDonationCount = totalData?.length ? totalData?.length : 0;
+    const donationAddedCount = donate?.length ? donate?.length : 0;
     const donationDifference = totalDonationCount - donationAddedCount;
 
     const data = [
