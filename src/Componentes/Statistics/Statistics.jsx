@@ -1,37 +1,66 @@
 import React, { useEffect, useState } from 'react';
-import { useLoaderData } from 'react-router-dom';
-import { ResponsiveContainer, PieChart, Pie, Legend ,Cell} from 'recharts';
+import { ResponsiveContainer, PieChart, Pie, Legend, Cell, Label, Tooltip } from 'recharts';
 
 const Statistics = () => {
+    const [totalData, SetTotaldata] = useState([]);
+    const [donate, setDonate] = useState([]);
 
-    const [totalData,SetTotaldata] = useState([])
-    const [donate,setDonate]=useState({})
+    useEffect(() => {
 
-        useEffect(()=>{
-            const data = useLoaderData
-            SetTotaldata(data)
-        },[])
-        useEffect(() => {
-            const Donation = JSON.parse(localStorage.getItem('donation'))
-            setDonate(Donation)
-        }, [])
+        fetch('api.json')
+            .then((response) => response.json())
+            .then((data) => {
+                SetTotaldata(data);
+            })
+            .catch((error) => {
+                console.error('Error fetching data:', error);
+            });
+
+        const Donation = JSON.parse(localStorage.getItem('donation'));
+        setDonate(Donation);
+    }, []);
+
+    // Calculate the percentage of "Donation added" relative to "Total Donation"
+    const totalDonationCount = totalData.length;
+    const donationAddedCount = donate.length;
+    const donationPercentage = (donationAddedCount / totalDonationCount) * 100;
+    const donationDifference = totalDonationCount - donationAddedCount;
 
     const data = [
-        { name: 'Total Donation', value:`${totalData.length}`, color: 'red' }, 
-        { name: 'Donation added', value: 1, color: '#00C49F' }, 
+        { name: 'Total Donation', value: totalDonationCount, color: 'red' },
+        { name: 'Donation added', value: donationAddedCount, color: '#00C49F' },
     ];
+
+    const CustomTooltip = ({ active, payload }) => {
+        if (active && payload && payload.length) {
+            const data = payload[0].payload;
+            return (
+                <div className="bg-white border border-gray-300 rounded-lg p-2">
+                    <p className="font-semibold">{data.name}</p>
+                    <p>Value: {data.value}</p>
+                    <p>Percentage: {((data.value / totalDonationCount) * 100).toFixed(2)}%</p>
+                    <p>Donation Difference: {donationDifference}</p>
+                </div>
+            );
+        }
+        return null;
+    };
 
     return (
         <>
-            <div style={{ width: '100%', height: 600 }}>
+            <div className="w-full h-96">
                 <ResponsiveContainer>
                     <PieChart>
                         <Pie dataKey="value" data={data} label>
                             {data.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={entry.color} />
                             ))}
+
+
+
                         </Pie>
                         <Legend />
+                        <Tooltip content={<CustomTooltip />} />
                     </PieChart>
                 </ResponsiveContainer>
             </div>
